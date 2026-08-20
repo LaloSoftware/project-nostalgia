@@ -28,7 +28,13 @@ ramas de larga vida con tres reglas:
 | `non_fast_forward` | Sin `push --force`: el historial publicado no se puede reescribir |
 | `deletion` | Las ramas protegidas no se pueden borrar |
 
-Alcance: `~DEFAULT_BRANCH` (es decir `main`) y `refs/heads/develop`. `bypass_actors` vacío.
+Alcance: `~DEFAULT_BRANCH` (es decir `main`), `refs/heads/develop` y `refs/heads/dev`.
+`bypass_actors` vacío.
+
+La tercera entrada, `refs/heads/dev`, no protege nada hoy: esa rama era la que existía sin
+haber recibido ningún commit y desapareció al crear `main` (ADR 0009). Se deja como guardia —
+si alguien llegara a crear una rama `dev`, nacería protegida en vez de convertirse en una vía
+sin revisión hacia el mismo trabajo. Es configuración inerte y barata, no un descuido.
 
 Parámetros del `pull_request` que se dejaron en su valor por defecto y por qué:
 `dismiss_stale_reviews_on_push = false` (una aprobación no se invalida al empujar más commits —
@@ -82,7 +88,7 @@ consecuencias que nadie quería:
   podría crear (no hay regla `creation` que lo impida) pero no recibir un segundo commit: cada
   corrección exigiría rehacerla con otro nombre.
 
-El alcance se limitó a `main` y `develop`. Las ramas de trabajo se crean, reciben pushes y se
+El alcance se limitó a `main`, `develop` y `dev`. Las ramas de trabajo se crean, reciben pushes y se
 borran con normalidad; lo que está protegido es el destino, no el camino.
 
 ## Flujo resultante

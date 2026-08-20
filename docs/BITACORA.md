@@ -297,7 +297,10 @@ irrecuperable: es el precio de haber empezado a versionar tarde.
   repositorio y no solo las dos de larga vida. Se verificó consultando las reglas efectivas de
   una rama hipotética `feature/cualquiera`: le aplicaban las tres. Con ese alcance ninguna rama
   se podría borrar nunca y las ramas de trabajo rechazarían un segundo push. Se acotó a
-  `~DEFAULT_BRANCH` y `refs/heads/develop`.
+  `~DEFAULT_BRANCH`, `refs/heads/develop` y `refs/heads/dev` (esta última inerte: la rama `dev`
+  desapareció al crear `main`, queda como guardia por si alguien la recrea).
+  **Verificado** contra las reglas efectivas de cada rama: `main` y `develop` con las tres
+  reglas, la rama de trabajo sin ninguna.
 - Cambió una premisa del ADR 0009: hay colaboradores invitados al repositorio, pendientes de
   aceptar. Por eso se mantuvo el requisito de 1 aprobación en vez de bajarlo a 0, que es lo
   habitual en proyectos de una sola persona.
@@ -311,8 +314,7 @@ irrecuperable: es el precio de haber empezado a versionar tarde.
 
 **Pendiente tras este cierre:**
 - Que un colaborador acepte la invitación y apruebe el PR de documentación pendiente.
-- Confirmar que el alcance del ruleset quedó acotado a `main` y `develop` en la configuración
-  real, no solo decidido.
+- Nada sobre el ruleset: el alcance quedó verificado en la configuración real, no solo decidido.
 - Sin cambios respecto a la sesión anterior: confirmación visual de MilkDrop, verificación con
   hardware real (30+ min), reconexión automática de entrada, puente de PCM para MilkDrop, y
   build/verificación en Windows (ver `docs/ROADMAP.md`).
