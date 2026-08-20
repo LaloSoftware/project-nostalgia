@@ -233,3 +233,64 @@ negra con el botón de cambio de preset — no el comportamiento esperado.
   pendiente, no se puede hacer sin el tocadiscos conectado a este entorno.
 - Reconexión automática de entrada, puente de PCM para MilkDrop en Fase B, build/verificación en
   Windows — sin cambios desde la sesión anterior, ver `docs/ROADMAP.md`.
+
+---
+
+## 2026-08-19 — Integración a git y publicación del repositorio
+
+**Contexto de la sesión:** el proyecto llevaba cuatro fases completas (0, A, B y C) sin estar
+versionado. El `.git` existía con una rama `dev` que nunca recibió un commit, sin remoto, y los
+87 archivos vivían solo como archivos sin rastrear en un disco. Edward pidió integrar todo a un
+repositorio, con el trabajo en una rama de desarrollo y `main` limpia.
+
+**Se hizo:**
+- Identidad de git configurada con `--local` (no se tocó la configuración global de la máquina):
+  `Eduardo Lemus Laguna <eduardo.lemus.laguna@gmail.com>`. Antes git inferría
+  `edwardll@MacBook-Pro-de-Eduardo.local`, que GitHub no puede vincular a una cuenta.
+- `.gitignore` de raíz creado, deliberadamente mínimo (`.DS_Store` y directorios de editores).
+  `app/` y `app/src-tauri/` ya declaraban sus propias exclusiones y centralizarlas rompería la
+  separación de dominios de CLAUDE.md.
+- `main` creada con un único commit vacío y cero archivos; `develop` ramificada de ella, con el
+  proyecto completo repartido en cinco commits temáticos (directivas, documentación, andamiaje
+  Vite+Tauri, motor de audio en Rust, frontend y carátulas).
+- La rama `dev` desapareció sola al crear `main`: una rama sin nacer no es una referencia real,
+  no hubo nada que borrar.
+- Remoto `origin` apuntando a `https://github.com/LaloSoftware/project-nostalgia.git`, que se
+  verificó vacío (`git ls-remote` sin refs) antes de tocar nada — ninguna operación podía
+  sobrescribir trabajo ajeno.
+
+**Se decidió** (ADR 0009, nuevo):
+- Dos ramas de larga vida con ancestro común, no rama huérfana: `--orphan` habría dado una
+  `main` vacía sin el commit-artefacto, pero condenaría todo merge futuro a
+  `--allow-unrelated-histories`. Se cambió un commit vacío permanente por evitar una fricción
+  permanente peor.
+- Commits temáticos en vez de un solo `Initial commit` de 87 archivos, para que `git log` diga
+  algo sobre la estructura del proyecto.
+- Trunk-based (una sola rama) descartado porque de `main` se producen los instaladores, y ese
+  pipeline —build universal + el `.dmg` con el timeout de AppleScript resuelto en la Fase C— ya
+  tiene suficientes aristas para no dispararlo desde una rama que puede estar a medias.
+- git-flow completo descartado por desproporción: un desarrollador, sin releases coordinados.
+
+**Números que sustentan las exclusiones:** el árbol versionado pesa 1,1 MB frente a 4,9 GB de
+`app/src-tauri/target/` y 172 MB de `app/node_modules/` que quedan fuera — un factor de ~4 700
+contra el `target/`. De ese 1,1 MB, 532 KB son los iconos de la aplicación: casi la mitad del
+repositorio son binarios que no cambiarán, y el código más la documentación juntos pesan menos
+que los iconos.
+
+**Costo asumido, nombrado explícitamente:** el historial no refleja la cronología real del
+desarrollo. Las cuatro fases ocurrieron antes del primer commit, así que los cinco commits
+temáticos son una reconstrucción por temas y no un registro. `git log`, `git bisect` y
+`git blame` no pueden responder cuándo se descubrió nada de lo que está en los ADRs 0001–0008.
+Esa información sigue en este archivo y en `docs/decisiones/`, pero la asimetría es
+irrecuperable: es el precio de haber empezado a versionar tarde.
+
+**Pendiente para la siguiente sesión:**
+- De aquí en adelante, cada sesión de trabajo cierra con sus propios commits — es la única forma
+  de no volver a pagar el costo anterior.
+- Confirmar en GitHub que `main` quedó como rama por defecto, y considerar protegerla (exigir PR
+  desde `develop`), coherente con el ADR 0009.
+- `develop` no está protegida: un `push --force` accidental ya puede perder trabajo, ahora que
+  el remoto no está vacío.
+- Sin cambios respecto a la sesión anterior: confirmación visual de MilkDrop, verificación con
+  hardware real (30+ min), reconexión automática de entrada, puente de PCM para MilkDrop, y
+  build/verificación en Windows (ver `docs/ROADMAP.md`).

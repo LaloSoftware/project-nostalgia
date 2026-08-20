@@ -35,3 +35,4 @@ código.
 | [0006](decisiones/0006-polling-en-raf-vs-eventos.md) | Polling en `rAF` vs eventos Rust→JS | aceptada |
 | [0007](decisiones/0007-dependencias-y-cadena-de-suministro.md) | Dependencias del frontend y cadena de suministro (pnpm) | aceptada |
 | [0008](decisiones/0008-hilo-dedicado-de-resampleo.md) | Resampleo en un hilo dedicado, no en el callback de salida | aceptada |
+| [0009](decisiones/0009-modelo-de-ramas-y-publicacion.md) | Modelo de ramas y publicación del repositorio | aceptada |
