@@ -1,0 +1,13 @@
+# Reglas de la raíz del repositorio.
+#
+# Deliberadamente mínimo: `app/.gitignore` y `app/src-tauri/.gitignore` declaran
+# lo suyo (node_modules, dist, target, gen/schemas). No duplicar esas reglas aquí
+# — cada subárbol es dueño de las propias (ver CLAUDE.md, separación de la raíz).
+
+# Basura del sistema operativo
+.DS_Store
+
+# Directorios de editores
+.vscode/*
+!.vscode/extensions.json
+.idea/
