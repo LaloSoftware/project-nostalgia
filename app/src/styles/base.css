@@ -1,0 +1,65 @@
+/* Reset y fundamentos del shell. Las carátulas traen su propio CSS (skin.css de cada una) y
+   nunca dependen de clases de utilidad compartidas — ver
+   docs/decisiones/0007-dependencias-y-cadena-de-suministro.md, sección "qué se descartó". */
+
+@import "@fontsource/vt323";
+@import "@fontsource/share-tech-mono";
+
+/* Solo la cara Regular de DSEG7-Classic, no el paquete dseg/css/dseg.css completo — ese archivo
+   trae las 4 familias (7/14 segmentos × Classic/Modern) en 4 pesos e itálicas, ~1.5 MB de fuentes
+   que Nostalgia no usa. Un único @font-face apunta directo al archivo que sí se necesita. */
+@font-face {
+  font-family: "DSEG7-Classic";
+  src:
+    url("dseg/fonts/DSEG7-Classic/DSEG7Classic-Regular.woff2") format("woff2"),
+    url("dseg/fonts/DSEG7-Classic/DSEG7Classic-Regular.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+  --shell-bg: #0a0a0c;
+  --shell-fg: #d8d8dc;
+  --shell-accent: #3ddc84;
+  --shell-border: #232326;
+  --shell-font: "Share Tech Mono", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--shell-bg);
+  color: var(--shell-fg);
+  font-family: var(--shell-font);
+  overflow: hidden; /* cada carátula controla su propio scroll interno si lo necesita */
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  width: 100dvw;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Utilidad compartida solo para accesibilidad, no para presentación — no cuenta como el
+   "framework de utilidades" descartado en el ADR 0007. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

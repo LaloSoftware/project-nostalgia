@@ -1,0 +1,81 @@
+.shell-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--shell-bg);
+  border-bottom: 1px solid var(--shell-border);
+  flex: none;
+}
+
+.shell-skins {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.shell-skin-btn {
+  padding: 0.35rem 0.7rem;
+  border-radius: 4px;
+  border: 1px solid var(--shell-border);
+  background: transparent;
+  color: var(--shell-fg);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+.shell-skin-btn[aria-pressed="true"] {
+  border-color: var(--shell-accent);
+  color: var(--shell-accent);
+}
+
+.shell-settings-toggle {
+  padding: 0.35rem 0.7rem;
+  border-radius: 4px;
+  border: 1px solid var(--shell-border);
+  background: transparent;
+  color: var(--shell-fg);
+  font-size: 0.75rem;
+}
+
+.shell-error {
+  padding: 0.5rem 0.75rem;
+  background: #3a1414;
+  color: #ffb4b4;
+  font-size: 0.8rem;
+  border-bottom: 1px solid var(--shell-border);
+  flex: none;
+}
+
+.shell-stage {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.shell-settings {
+  flex: none;
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  padding: 0.75rem;
+  background: var(--shell-bg);
+  border-top: 1px solid var(--shell-border);
+  font-size: 0.75rem;
+}
+
+.shell-settings label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: var(--shell-fg);
+}
+
+.shell-settings select {
+  background: #17171a;
+  color: var(--shell-fg);
+  border: 1px solid var(--shell-border);
+  border-radius: 4px;
+  padding: 0.3rem 0.4rem;
+  font-family: inherit;
+}

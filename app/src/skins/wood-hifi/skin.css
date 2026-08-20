@@ -1,0 +1,175 @@
+.wh-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: 100%;
+  padding: 2rem;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.08) 0px,
+      transparent 2px,
+      transparent 22px,
+      rgba(0, 0, 0, 0.05) 24px
+    ),
+    linear-gradient(155deg, #8a5a34 0%, #6e4425 45%, #52301a 100%);
+  color: #f2e6d2;
+  font-family: "Georgia", "Iowan Old Style", serif;
+}
+
+.wh-gauges {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.wh-gauge {
+  position: relative;
+  width: min(38vw, 260px);
+  aspect-ratio: 2 / 1.15;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.wh-gauge-arc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  background:
+    conic-gradient(
+      from 228deg,
+      #7a1f1f 0deg 12deg,
+      #d0d0c8 12deg 96deg,
+      #7a1f1f 96deg 104deg
+    );
+  mask: radial-gradient(farthest-side at 50% 100%, transparent 0 62%, #000 63% 100%);
+  -webkit-mask: radial-gradient(farthest-side at 50% 100%, transparent 0 62%, #000 63% 100%);
+  opacity: 0.92;
+}
+
+.wh-needle {
+  position: absolute;
+  bottom: 4%;
+  left: 50%;
+  width: 3px;
+  height: 78%;
+  background: linear-gradient(180deg, #1a1a1a, #3a3a3a);
+  transform-origin: bottom center;
+  translate: -50% 0;
+  rotate: 0deg;
+  border-radius: 2px;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.6);
+}
+
+.wh-needle-pivot {
+  position: absolute;
+  bottom: 2%;
+  left: 50%;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #d8c39a, #7a6440 70%);
+  transform: translateX(-50%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.wh-gauge-label {
+  position: absolute;
+  bottom: -1.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  letter-spacing: 0.15em;
+  font-size: 0.75rem;
+}
+
+.wh-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: #e9d9bd;
+  opacity: 0.85;
+}
+
+.wh-controls {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3rem;
+}
+
+.wh-fader-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.wh-fader-track {
+  position: relative;
+  width: 2.2rem;
+  height: 9rem;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #2a1c10, #3d2917 50%, #2a1c10);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);
+}
+
+.wh-fader-thumb {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3.2rem;
+  height: 1rem;
+  transform: translate(-50%, -50%);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #d8c39a, #a68752 60%, #7a6440);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.5);
+  cursor: grab;
+  touch-action: none;
+}
+
+.wh-fader-thumb:active {
+  cursor: grabbing;
+}
+
+.wh-switches {
+  display: flex;
+  gap: 2rem;
+}
+
+.wh-switch-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.wh-switch {
+  width: 3.2rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(180deg, #2a1c10, #1a1109);
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.7);
+  position: relative;
+  padding: 0;
+}
+
+.wh-switch-lever {
+  position: absolute;
+  top: 0.15rem;
+  left: 0.15rem;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #d8c39a, #7a6440 70%);
+  transition: left 120ms ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.wh-switch.on .wh-switch-lever {
+  left: 1.75rem;
+  background: radial-gradient(circle at 35% 30%, #e8b96a, #b5761f 70%);
+}
