@@ -36,3 +36,4 @@ código.
 | [0007](decisiones/0007-dependencias-y-cadena-de-suministro.md) | Dependencias del frontend y cadena de suministro (pnpm) | aceptada |
 | [0008](decisiones/0008-hilo-dedicado-de-resampleo.md) | Resampleo en un hilo dedicado, no en el callback de salida | aceptada |
 | [0009](decisiones/0009-modelo-de-ramas-y-publicacion.md) | Modelo de ramas y publicación del repositorio | aceptada |
+| [0010](decisiones/0010-proteccion-de-ramas.md) | Protección de ramas con rulesets y flujo de pull requests | aceptada |

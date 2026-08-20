@@ -287,10 +287,32 @@ irrecuperable: es el precio de haber empezado a versionar tarde.
 **Pendiente para la siguiente sesión:**
 - De aquí en adelante, cada sesión de trabajo cierra con sus propios commits — es la única forma
   de no volver a pagar el costo anterior.
-- Confirmar en GitHub que `main` quedó como rama por defecto, y considerar protegerla (exigir PR
-  desde `develop`), coherente con el ADR 0009.
-- `develop` no está protegida: un `push --force` accidental ya puede perder trabajo, ahora que
-  el remoto no está vacío.
+
+**Cierre de la misma sesión — protección de ramas (ADR 0010):**
+- Confirmado que `main` quedó como rama por defecto del repositorio.
+- Edward creó el ruleset `devPR` (`enforcement: active`) con tres reglas: `pull_request` con 1
+  aprobación requerida, `non_fast_forward` y `deletion`. Eso cierra el riesgo que este mismo
+  registro dejaba abierto sobre el `push --force` en `develop`.
+- Al revisarlo vía API se detectó que el alcance inicial era `~ALL`, es decir toda rama del
+  repositorio y no solo las dos de larga vida. Se verificó consultando las reglas efectivas de
+  una rama hipotética `feature/cualquiera`: le aplicaban las tres. Con ese alcance ninguna rama
+  se podría borrar nunca y las ramas de trabajo rechazarían un segundo push. Se acotó a
+  `~DEFAULT_BRANCH` y `refs/heads/develop`.
+- Cambió una premisa del ADR 0009: hay colaboradores invitados al repositorio, pendientes de
+  aceptar. Por eso se mantuvo el requisito de 1 aprobación en vez de bajarlo a 0, que es lo
+  habitual en proyectos de una sola persona.
+- **Bloqueo temporal conocido:** hasta que un colaborador acepte la invitación no se puede
+  fusionar nada, porque GitHub no permite aprobar el propio PR y con `bypass_actors` vacío el
+  administrador tampoco está exento. Salida de emergencia si hiciera falta: añadirse como
+  actor de bypass, fusionar y retirarse en el acto — teniendo presente que el bypass es por
+  actor y no por regla, así que también exime de `non_fast_forward`.
+- Consecuencia práctica inmediata: el push directo a `develop` ya no existe. Esta documentación
+  entró por rama de trabajo y pull request, como todo lo que venga después.
+
+**Pendiente tras este cierre:**
+- Que un colaborador acepte la invitación y apruebe el PR de documentación pendiente.
+- Confirmar que el alcance del ruleset quedó acotado a `main` y `develop` en la configuración
+  real, no solo decidido.
 - Sin cambios respecto a la sesión anterior: confirmación visual de MilkDrop, verificación con
   hardware real (30+ min), reconexión automática de entrada, puente de PCM para MilkDrop, y
   build/verificación en Windows (ver `docs/ROADMAP.md`).

@@ -85,7 +85,9 @@ que puede estar a medias. Que `main` sea siempre publicable tiene valor operativ
 ### git-flow completo (`release/*`, `hotfix/*`, `feature/*`)
 
 Se descartó por desproporción: un desarrollador, sin releases coordinados ni versiones
-mantenidas en paralelo. Las ramas de `release` existen para estabilizar mientras el desarrollo
+mantenidas en paralelo. (Ese supuesto cambió horas después —hay colaboradores invitados— pero
+la conclusión se sostiene: lo que se añadió fue una capa de revisión, no ramas de release; ver
+ADR 0010.) Las ramas de `release` existen para estabilizar mientras el desarrollo
 sigue en otra parte, y aquí no hay dos frentes simultáneos que estabilizar. Sería burocracia
 sin beneficio.
 
@@ -139,6 +141,9 @@ dueño de sus propias exclusiones. Verificado con `git add -An` antes del primer
   a posteriori exige reescribir el historial.
 - **`develop` no está protegida.** Un `push --force` accidental sobre ella sí puede perder
   trabajo, ahora que el remoto ya no está vacío.
+  **Cerrado el mismo día por el ADR 0010:** un ruleset con `non_fast_forward` sobre `main` y
+  `develop` lo impide. Nótese que eso también vuelve irreversible de hecho el commit raíz vacío
+  y la dirección de correo del historial, listados arriba como "permanentes" por dificultad.
 
 ## Qué se sacrificó
 
