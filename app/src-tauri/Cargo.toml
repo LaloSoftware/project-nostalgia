@@ -1,0 +1,39 @@
+[package]
+name = "nostalgia"
+version = "0.1.0"
+description = "Monitor de línea para tocadiscos, con carátulas nostálgicas"
+authors = ["Eduardo"]
+license = ""
+repository = ""
+edition = "2021"
+rust-version = "1.77.2"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.6.3", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+log = "0.4"
+tauri = { version = "2.11.3", features = ["tray-icon"] }
+tauri-plugin-log = "2"
+
+# Motor de audio — ver docs/arquitectura/motor-de-audio.md.
+# cpal: streams de entrada/salida multiplataforma (CoreAudio/WASAPI/ALSA).
+# rtrb: ring buffer lock-free SPSC entre el callback de entrada y el de salida.
+# rubato: resampling de ratio variable — corrección de deriva de reloj (ver
+#   docs/arquitectura/correccion-de-deriva.md) y conversión de tasa de muestreo.
+# rustfft: espectro para el analizador de las carátulas (hilo no realtime, ver analysis.rs).
+cpal = "0.18.1"
+rtrb = "0.3.4"
+rubato = "5.0.0"
+rustfft = "6.4.1"
+# rubato re-exporta esta misma versión (`pub use audioadapter_buffers;`); se declara aquí también
+# para poder importarla directo como `audioadapter_buffers::...` en vez de `rubato::audioadapter_buffers::...`.
+audioadapter-buffers = "5.1.0"

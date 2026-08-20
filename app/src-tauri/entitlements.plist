@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Necesario para firma con hardened runtime / notarización. Sin esto, una build firmada
+       (no ad-hoc) puede negar el acceso al micrófono aunque el usuario lo autorice en el
+       diálogo del sistema. Ver docs/guias/permisos-de-plataforma.md. -->
+  <key>com.apple.security.device.audio-input</key>
+  <true/>
+</dict>
+</plist>

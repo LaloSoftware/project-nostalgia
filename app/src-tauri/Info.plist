@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- CoreAudio exige este permiso desde macOS 10.14. Se dispara al abrir el primer stream de
+       entrada (ver src-tauri/src/audio/devices.rs). Ver
+       docs/guias/permisos-de-plataforma.md. -->
+  <key>NSMicrophoneUsageDescription</key>
+  <string>Nostalgia necesita el micrófono/entrada de línea para monitorear tu tocadiscos.</string>
+</dict>
+</plist>
