@@ -294,3 +294,50 @@ irrecuperable: es el precio de haber empezado a versionar tarde.
 - Sin cambios respecto a la sesión anterior: confirmación visual de MilkDrop, verificación con
   hardware real (30+ min), reconexión automática de entrada, puente de PCM para MilkDrop, y
   build/verificación en Windows (ver `docs/ROADMAP.md`).
+
+---
+
+## 2026-08-23 — Servidor Docker en LAN para pruebas multidispositivo (ADR 0011)
+
+**Contexto:** Edward tiene un servidor privado en su red local (sin salida a internet) y quiere
+servir ahí la versión web de desarrollo, para probarla desde cualquier dispositivo de la LAN sin
+instalar Node/pnpm/Tauri en cada uno — mitigando de paso, por ahora, la fricción de Linux ya
+documentada en `docs/ROADMAP.md` (WebKitGTK + ALSA vía capa de compatibilidad).
+
+**Se hizo:**
+- `app/docker/Dockerfile` (multi-stage: `node:22-alpine` para `pnpm build` → `caddy:2.9-alpine`
+  para servir `dist/`), `app/docker/docker-compose.yml`, `app/docker/Caddyfile`,
+  `app/.dockerignore`.
+- Guía operativa `docs/guias/despliegue-docker-lan.md` (cómo levantar el contenedor, cómo probar
+  desde otro dispositivo, cómo reconstruir tras cambios).
+
+**Se decidió** (ADR 0011, nuevo):
+- Caddy sobre nginx como servidor estático: el camino directo a HTTPS con CA local (`tls
+  internal`) en una Etapa 2 futura evita tener que gestionar `mkcert`/`step-ca` a mano.
+- Etapa 1 (implementada): HTTP plano en el puerto 8080, sin TLS. Como `getUserMedia` exige
+  "contexto seguro" y el servidor no tiene salida a internet para pedir un certificado público,
+  cada navegador cliente se lanza con `--unsafely-treat-insecure-origin-as-secure` como medida
+  temporal y documentada, no como solución final.
+- Sin hot-reload distribuido: build estático + `docker compose up --build` manual cuando haya
+  cambios que probar en otro dispositivo. El día a día sigue siendo `pnpm dev` local.
+- El motor Rust nativo (`cpal`) queda fuera de este alcance por completo — el contenedor nunca
+  toca hardware de audio; el audio real lo captura el navegador cliente vía `WebAudioEngine`
+  (`isTauri()` es falso fuera de la app de escritorio).
+
+**Números:** build estático de 1.0 MB (`app/dist`); `node_modules` del stage builder (172 MB)
+descartado íntegro de la imagen final (multi-stage); tamaño de imagen final y tiempo de build
+quedan pendientes de medir en el servidor real.
+
+**Costo asumido:** sin HMR entre dispositivos, sin TLS ni autenticación en esta etapa, puerto
+expuesto a toda la LAN salvo restricción de firewall aparte, sin `engines` de Node fijado en
+`package.json` (riesgo de deriva de versión entre la imagen y la máquina de desarrollo).
+
+**Pendiente:**
+- Verificación end-to-end real desde un segundo dispositivo de la LAN (build de la imagen,
+  permiso de micrófono con la bandera insegura, reacción de las carátulas a audio real).
+- Medir y registrar en el ADR 0011 el tamaño real de la imagen y el tiempo de build.
+- Etapa 2 (HTTPS con `tls internal` + instalación de CA en clientes) queda trazada en el ADR pero
+  sin implementar.
+- Sin cambios respecto a la sesión anterior: confirmación visual de MilkDrop, verificación con
+  hardware real (30+ min), reconexión automática de entrada, puente de PCM para MilkDrop, y
+  build/verificación en Windows (ver `docs/ROADMAP.md`).

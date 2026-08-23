@@ -1,0 +1,12 @@
+# Etapa 1: HTTP plano, sin TLS. Ver docs/decisiones/0011-servidor-docker-lan-para-pruebas-multidispositivo.md
+# para el camino de Etapa 2 (reemplazar el bloque `:80 { ... }` por uno con `tls internal`).
+:80 {
+	root * /srv
+	encode gzip zstd
+
+	# Nostalgia es una sola página sin rutas de cliente hoy (sin router en app/src). Se deja
+	# preparado por si en el futuro se agregan rutas del lado del cliente, para no tener que
+	# tocar esta config entonces.
+	try_files {path} /index.html
+	file_server
+}

@@ -1,0 +1,15 @@
+# Etapa 1 — ver docs/decisiones/0011-servidor-docker-lan-para-pruebas-multidispositivo.md
+# y docs/guias/despliegue-docker-lan.md para el procedimiento completo.
+#
+# Levantar con:
+#   cd app/docker && docker compose up --build
+services:
+  nostalgia-web:
+    build:
+      context: ..                # app/ — el Dockerfile necesita package.json, pnpm-lock.yaml y src/
+      dockerfile: docker/Dockerfile
+    image: nostalgia-web:latest
+    container_name: nostalgia-web
+    restart: unless-stopped
+    ports:
+      - "8080:80"                 # host:contenedor — ajustar el puerto de host si 8080 ya está en uso
