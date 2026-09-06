@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Variables de entorno del despliegue Docker LAN (docs/decisiones/0012-...): específico del
+# operador (la IP real del servidor), nunca versionado. docker/.env.example sí se versiona.
+docker/.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

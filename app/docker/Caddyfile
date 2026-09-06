@@ -1,6 +1,17 @@
-# Etapa 1: HTTP plano, sin TLS. Ver docs/decisiones/0011-servidor-docker-lan-para-pruebas-multidispositivo.md
-# para el camino de Etapa 2 (reemplazar el bloque `:80 { ... }` por uno con `tls internal`).
-:80 {
+# Etapa 2: HTTPS con CA local (`tls internal`). Ver
+# docs/decisiones/0012-https-con-ca-local-para-el-servidor-docker-lan.md para las alternativas
+# consideradas y los riesgos aceptados, y docs/guias/despliegue-docker-lan.md para el
+# procedimiento de instalar la CA en cada dispositivo cliente.
+#
+# {$NOSTALGIA_LAN_HOST} es obligatorio (sin valor por defecto a propósito): tiene que ser la
+# IP o nombre real con el que los clientes de la LAN van a escribir la URL (ej. 192.168.1.50),
+# porque ES el Subject Alternative Name que Caddy graba en el certificado. Si no coincide
+# exactamente con lo que el navegador pone en la barra de direcciones, TLS falla — se pasa por
+# variable de entorno (ver docker-compose.yml/.env) en vez de escribirlo aquí a mano, para no
+# tener que editar este archivo (ni reconstruir la imagen) cada vez que cambie.
+{$NOSTALGIA_LAN_HOST} {
+	tls internal
+
 	root * /srv
 	encode gzip zstd
 

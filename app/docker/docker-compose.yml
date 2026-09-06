@@ -1,5 +1,9 @@
-# Etapa 1 — ver docs/decisiones/0011-servidor-docker-lan-para-pruebas-multidispositivo.md
-# y docs/guias/despliegue-docker-lan.md para el procedimiento completo.
+# Etapa 2 (HTTPS con CA local) — ver
+# docs/decisiones/0012-https-con-ca-local-para-el-servidor-docker-lan.md y
+# docs/guias/despliegue-docker-lan.md para el procedimiento completo.
+#
+# Antes de levantar: crear app/docker/.env con NOSTALGIA_LAN_HOST=<ip-o-nombre-real-del-servidor>
+# (ver app/docker/.env.example) — es obligatorio, Caddy no arranca sin él (ver Caddyfile).
 #
 # Levantar con:
 #   cd app/docker && docker compose up --build
@@ -11,5 +15,21 @@ services:
     image: nostalgia-web:latest
     container_name: nostalgia-web
     restart: unless-stopped
+    environment:
+      # Sin valor por defecto a propósito — ver la nota en Caddyfile sobre por qué este valor
+      # tiene que ser exacto (es el SAN del certificado). docker compose falla al levantar si
+      # NOSTALGIA_LAN_HOST no está definido en el entorno o en .env, en vez de arrancar con un
+      # certificado que ningún cliente real va a poder validar.
+      - NOSTALGIA_LAN_HOST=${NOSTALGIA_LAN_HOST:?falta NOSTALGIA_LAN_HOST — ver app/docker/.env.example}
     ports:
-      - "8080:80"                 # host:contenedor — ajustar el puerto de host si 8080 ya está en uso
+      - "80:80"                   # host:contenedor — redirección automática de Caddy a 443
+      - "443:443"                 # host:contenedor — TLS (`tls internal`), ajustar ambos si ya están en uso
+    volumes:
+      # Persiste la CA interna que Caddy genera dentro del contenedor
+      # (/data/caddy/pki/authorities/local/root.crt) entre reconstrucciones de la imagen. Sin
+      # esto, cada `--build` regenera la CA y invalida la confianza ya instalada en todos los
+      # dispositivos cliente — ver el riesgo documentado en el ADR 0012.
+      - caddy_data:/data
+
+volumes:
+  caddy_data:

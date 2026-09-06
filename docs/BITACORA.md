@@ -341,3 +341,90 @@ expuesto a toda la LAN salvo restricción de firewall aparte, sin `engines` de N
 - Sin cambios respecto a la sesión anterior: confirmación visual de MilkDrop, verificación con
   hardware real (30+ min), reconexión automática de entrada, puente de PCM para MilkDrop, y
   build/verificación en Windows (ver `docs/ROADMAP.md`).
+
+---
+
+## 2026-08-29 — HTTPS real para el servidor Docker LAN (ADR 0012) y traza del error de Windows
+
+**Contexto:** Edward reportó dos problemas al revisar la app: (1) había habilitado HTTPS del lado
+del servidor por su cuenta pero no lograba conectar, y (2) en Windows había aparecido un error al
+enumerar los dispositivos de entrada. Antes de tocar código se hizo un diagnóstico contra el
+código real de ambos.
+
+**Diagnóstico de (1):** la Etapa 2 (HTTPS con `tls internal`) que el ADR 0011 dejó trazada nunca
+se había implementado en este repo — el `Caddyfile` seguía siendo el bloque `:80` plano de la
+Etapa 1 y `docker-compose.yml` no exponía ningún puerto TLS. No era un error de configuración del
+servidor de Edward; era trabajo pendiente.
+
+**Diagnóstico de (2):** `devices::list_input_devices()` (`app/src-tauri/src/audio/devices.rs`)
+descartaba el `Err` de `host.input_devices()` en silencio (`let Ok(...) else { Vec::new() }`), sin
+loguearlo ni propagarlo — la causa real de cualquier fallo de enumeración en Windows (WASAPI) era
+irrastreable por diseño, no por accidente.
+
+**Se hizo (fix de Windows):**
+- `devices.rs`: `list_input_devices()` ahora devuelve `Result<Vec<AudioDeviceInfo>, String>`,
+  logueando el error real con `log::error!` y traduciéndolo con `describe_cpal_error()`
+  (reutilizado de `mod.rs`, cuyo mensaje de reserva se generalizó de "no se pudo iniciar la
+  entrada de audio" a "Error de audio no clasificado" porque ahora sirve a ambos contextos).
+  `find_input_device()` (usado por `start()`/`get_input_channel_count()`) gana el mismo log en su
+  ruta de enumeración fallida, sin cambiar su firma `Option<Device>` para no tocar el manejo ya
+  existente de "dispositivo no encontrado" en `mod.rs`.
+- `commands.rs`/`mod.rs::Engine::list_input_devices`: propagan el `Result` hasta el comando IPC.
+- `app/src/main.ts`: `init()` ya no deja que un fallo de `listInputDevices()` tumbe el arranque
+  completo (antes, eso habría dejado la app sin bucle de `rAF`, congelada); se captura con
+  `describeError()` (el mismo traductor que ya usa `handleSelectDevice`) y se muestra el motivo
+  real en el banner, en vez del genérico de `init().catch()`.
+- Verificado: `cargo check` limpio, `tsc --noEmit` limpio. **No verificado en Windows real** — sin
+  esa plataforma disponible en este entorno; queda para que Edward confirme el mensaje real la
+  próxima vez que ocurra.
+
+**Se decidió y se hizo (HTTPS, ADR 0012 nuevo):**
+- `NOSTALGIA_LAN_HOST` como variable de entorno obligatoria (sin default) para el `Caddyfile` — es
+  el SAN del certificado, no puede vivir hardcodeado en un archivo versionado que sirve para
+  cualquier operador. `app/docker/.env.example` versionado como plantilla, `.env` real excluido de
+  git y de la imagen.
+- `docker-compose.yml`: puertos `80`/`443` (antes `8080`), volumen con nombre `caddy_data:/data`
+  para persistir la CA entre reconstrucciones — sin esto, cada `--build` invalidaría la confianza
+  ya instalada en todos los clientes.
+- Distribución de la CA a clientes vía `docker cp` + instalación manual una vez por dispositivo
+  (documentado por sistema operativo en la guía) — se evaluó y descartó servirla desde el propio
+  Caddy por HTTP, por desproporción (ver alternativas en el ADR).
+- Etapa 1 (HTTP plano) reemplazada, no mantenida en paralelo: no había razón para conservar el
+  riesgo que esta etapa existe para cerrar.
+
+**Verificado de verdad en este entorno** (Docker Desktop de este Mac, `NOSTALGIA_LAN_HOST` puesto a
+la IP LAN de esta máquina — sin un segundo dispositivo de LAN real disponible aquí):
+- `docker compose up --build` limpio; logs de Caddy confirman la redirección automática y
+  `"certificate obtained successfully"` para el host configurado.
+- `curl -sI http://<ip>/` → `308` a `https://<ip>/`.
+- **Hallazgo real no anticipado:** `curl -k https://<ip>/` falla en macOS con
+  `tlsv1 alert internal error` — diagnosticado con `openssl s_client` como ausencia de SNI (el
+  `curl`/LibreSSL de macOS no manda SNI para IPs literales, por RFC 6066; Caddy no tiene
+  certificado que ofrecer sin él). Con `-servername <ip>` explícito, la conexión funciona. Los
+  navegadores reales sí mandan SNI para IPs (desviación deliberada del RFC que adoptaron para
+  soportar justo este caso), así que no debería afectar el uso real — pero **no se pudo confirmar
+  con un navegador real** en este entorno (sin la extensión de Chrome de Claude conectada).
+  Documentado en el ADR 0012 y en la guía para no repetir el mismo diagnóstico erróneo.
+- `docker cp` del `root.crt` + `openssl s_client -CAfile` contra él → `Verify return code: 0 (ok)`:
+  la cadena de confianza completa funciona de verdad, no solo en teoría.
+- **Se corrigió una suposición equivocada del primer borrador del ADR 0012 antes de cerrarlo:** se
+  había asumido 1 año de vigencia para el certificado de hoja sin verificarlo; medido de verdad,
+  son 12 horas exactas (Caddy renueva solo, en segundo plano). La CA raíz sí vive ~9 años y 10
+  meses.
+- `docs/README.md`: el índice de ADRs no tenía el ADR 0011 (omisión de la sesión anterior) — se
+  agregó junto con el 0012.
+- Contenedor de prueba bajado al cerrar la sesión (`docker compose down`, sin `-v`); `.env` local
+  de esta máquina no se commitea (gitignorado).
+
+**Pendiente para la siguiente sesión:**
+- Confirmar HTTPS end-to-end desde un dispositivo real de la LAN de Edward (no simulado en este
+  Mac): handshake TLS desde un navegador real, permiso de micrófono, instalación de la CA en al
+  menos un cliente Windows/macOS/Android/iOS real.
+- Confirmar si `NOSTALGIA_LAN_HOST` necesita ser una IP reservada por DHCP en el router de Edward
+  (recomendado en el ADR 0012, no verificado que ya esté así).
+- Reproducir el error de Windows al enumerar dispositivos de entrada con el logging nuevo en su
+  lugar, para tener por fin el mensaje real de `cpal`/WASAPI en vez de la sospecha razonada de
+  esta sesión.
+- Sin cambios respecto a sesiones anteriores: confirmación visual de MilkDrop, verificación con
+  hardware real (30+ min), reconexión automática de entrada, puente de PCM para MilkDrop (ver
+  `docs/ROADMAP.md`).

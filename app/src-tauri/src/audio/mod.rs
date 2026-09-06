@@ -78,6 +78,9 @@ impl Default for EngineState {
 /// frontend recibía el mensaje crudo de `cpal::Error` (en inglés, pensado para logs, no para
 /// una persona) — ver `docs/guias/permisos-de-plataforma.md`, sección "Manejo del rechazo".
 /// `ErrorKind` es `#[non_exhaustive]`, así que el resto cae al mensaje propio de cpal.
+///
+/// Se reutiliza también en `devices::list_input_devices()`/`find_input_device()` (enumeración,
+/// no arranque) — de ahí que el mensaje de reserva (`_`) no asuma "iniciar la entrada de audio".
 pub(crate) fn describe_cpal_error(err: cpal::Error) -> String {
     match err.kind() {
         cpal::ErrorKind::PermissionDenied => {
@@ -100,7 +103,7 @@ pub(crate) fn describe_cpal_error(err: cpal::Error) -> String {
              o tasa de muestreo)."
                 .to_string()
         }
-        _ => format!("No se pudo iniciar la entrada de audio: {err}"),
+        _ => format!("Error de audio no clasificado: {err}"),
     }
 }
 
@@ -138,7 +141,7 @@ impl Engine {
         }
     }
 
-    pub fn list_input_devices(&self) -> Vec<AudioDeviceInfo> {
+    pub fn list_input_devices(&self) -> Result<Vec<AudioDeviceInfo>, String> {
         devices::list_input_devices()
     }
 

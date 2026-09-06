@@ -4,3 +4,4 @@ src-tauri
 .git
 *.log
 .DS_Store
+docker/.env

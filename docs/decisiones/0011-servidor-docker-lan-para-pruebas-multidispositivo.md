@@ -2,6 +2,12 @@
 
 **Estado:** aceptada — 2026-08-23
 
+> **Nota (2026-08-29):** la Etapa 2 descrita en "Trabajo futuro" más abajo ya está implementada —
+> ver `docs/decisiones/0012-https-con-ca-local-para-el-servidor-docker-lan.md` para las decisiones
+> concretas de esa implementación. El bloque `:80` de `app/docker/Caddyfile` que describe este ADR
+> ya no existe en el código; el contenido de este documento se deja intacto como registro histórico
+> de por qué se construyó así en su momento.
+
 ## Contexto
 
 Edward tiene un servidor privado en su red local (sin salida a internet) y quiere servir ahí la

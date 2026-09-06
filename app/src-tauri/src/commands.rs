@@ -16,7 +16,7 @@ use crate::state::AppState;
 use tauri::State;
 
 #[tauri::command]
-pub fn list_input_devices(state: State<AppState>) -> Vec<AudioDeviceInfo> {
+pub fn list_input_devices(state: State<AppState>) -> Result<Vec<AudioDeviceInfo>, String> {
     state.engine.lock().unwrap().list_input_devices()
 }
 

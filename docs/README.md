@@ -36,3 +36,5 @@ código.
 | [0007](decisiones/0007-dependencias-y-cadena-de-suministro.md) | Dependencias del frontend y cadena de suministro (pnpm) | aceptada |
 | [0008](decisiones/0008-hilo-dedicado-de-resampleo.md) | Resampleo en un hilo dedicado, no en el callback de salida | aceptada |
 | [0009](decisiones/0009-modelo-de-ramas-y-publicacion.md) | Modelo de ramas y publicación del repositorio | aceptada |
+| [0011](decisiones/0011-servidor-docker-lan-para-pruebas-multidispositivo.md) | Servidor Docker en LAN para pruebas multidispositivo (Etapa 1: HTTP plano) | aceptada |
+| [0012](decisiones/0012-https-con-ca-local-para-el-servidor-docker-lan.md) | HTTPS con CA local para el servidor Docker en LAN (Etapa 2) | aceptada |

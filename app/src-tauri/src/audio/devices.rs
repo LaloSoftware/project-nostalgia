@@ -14,6 +14,7 @@
 //! vez no resuelve (p. ej. tras cambiar de plataforma). El texto de
 //! docs/arquitectura/dispositivos.md se actualiza junto con este archivo.
 
+use super::describe_cpal_error;
 use cpal::traits::{DeviceTrait, HostTrait};
 use cpal::DeviceId;
 use serde::Serialize;
@@ -31,15 +32,31 @@ pub struct AudioDeviceInfo {
     pub channel_count: u16,
 }
 
-pub fn list_input_devices() -> Vec<AudioDeviceInfo> {
+/// Antes, un `host.input_devices()` fallido se tragaba en silencio devolviendo `Vec::new()`: la
+/// UI simplemente mostraba un selector vacío, sin ninguna pista de si el sistema no tenía
+/// dispositivos o si `cpal`/WASAPI (en Windows) falló al enumerarlos — un error real reportado en
+/// Windows resultó irrastreable por esto exacto. Ahora se loguea la causa (visible en la consola
+/// de Tauri en build de debug — ver `lib.rs`) y se propaga como `Result` hasta el comando IPC
+/// (`commands.rs`), reutilizando `describe_cpal_error` para el mismo texto accionable en español
+/// que ya usa `Engine::start()`.
+pub fn list_input_devices() -> Result<Vec<AudioDeviceInfo>, String> {
     let host = cpal::default_host();
-    let Ok(devices) = host.input_devices() else {
-        return Vec::new();
-    };
+    let devices = host.input_devices().map_err(|err| {
+        log::error!("cpal: fallo enumerando dispositivos de entrada: {err}");
+        describe_cpal_error(err)
+    })?;
 
-    devices
+    Ok(devices
         .filter_map(|device| {
-            let id = device.id().ok()?.to_string();
+            let id = match device.id() {
+                Ok(id) => id.to_string(),
+                Err(err) => {
+                    // Un dispositivo individual con id ilegible no debe tumbar la lista entera —
+                    // se omite ese dispositivo, pero se deja rastro de por qué desapareció.
+                    log::warn!("cpal: no se pudo leer el id de un dispositivo de entrada: {err}");
+                    return None;
+                }
+            };
             let label = device.to_string(); // DeviceTrait: Display — el nombre visible
             let channel_count = device
                 .default_input_config()
@@ -47,7 +64,7 @@ pub fn list_input_devices() -> Vec<AudioDeviceInfo> {
                 .unwrap_or(2);
             Some(AudioDeviceInfo { id, label, channel_count })
         })
-        .collect()
+        .collect())
 }
 
 /// Busca un dispositivo de entrada por el `id` persistido. Primero intenta resolverlo como
@@ -62,7 +79,17 @@ pub fn find_input_device(id_str: &str) -> Option<cpal::Device> {
         }
     }
 
-    let devices = host.input_devices().ok()?;
+    // A diferencia de list_input_devices() (arriba), esta ruta no puede devolver un `Result` sin
+    // romper la firma que ya consumen mod.rs:155/191 (ambas tratan "no encontrado" como un caso
+    // normal, no un error de sistema) — pero si la propia enumeración falla, vale la pena dejar
+    // rastro de por qué, en vez de que ambos casos se vean idénticos desde afuera (`None`).
+    let devices = match host.input_devices() {
+        Ok(devices) => devices,
+        Err(err) => {
+            log::error!("cpal: fallo enumerando dispositivos de entrada al buscar '{id_str}': {err}");
+            return None;
+        }
+    };
     devices.into_iter().find(|d| d.to_string() == id_str)
 }
 

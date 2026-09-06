@@ -2,7 +2,7 @@ import "./styles/base.css";
 
 import { isTauri } from "@tauri-apps/api/core";
 import { WebAudioEngine } from "./core/engine-web";
-import type { AudioEngine } from "./core/engine";
+import type { AudioDeviceInfo, AudioEngine } from "./core/engine";
 import type { AudioSource, Skin, SkinHostApi } from "./core/types";
 import { loadSettings, saveSettings } from "./core/settings";
 import { Shell } from "./ui/shell";
@@ -160,7 +160,17 @@ async function init(): Promise<void> {
   const initialSkinId = getSkin(settings.skinId) ? settings.skinId : skins[0].id;
   await mountSkin(initialSkinId);
 
-  const devices = await engine.listInputDevices();
+  // No se deja que un fallo aquí tumbe init() entero (nunca llegaría a requestAnimationFrame más
+  // abajo, dejando la UI congelada sin bucle de dibujo). En Fase B esto puede rechazar de verdad
+  // ahora que devices::list_input_devices() (src-tauri/src/audio/devices.rs) propaga el error de
+  // `cpal` en vez de tragárselo como lista vacía — ver el hallazgo de Windows documentado ahí.
+  let devices: AudioDeviceInfo[] = [];
+  try {
+    devices = await engine.listInputDevices();
+  } catch (err) {
+    console.error("listInputDevices falló:", err);
+    shell.showError(describeError(err));
+  }
   shell.setDevices(devices, settings.deviceId);
 
   if (settings.gainDb !== undefined) engine.setGainDb(settings.gainDb);
